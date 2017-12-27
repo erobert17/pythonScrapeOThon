@@ -1,0 +1,13 @@
+- name (main name of product)
+- product_url (link to the product page)
+- price (price of product / if discounted, the un-discounted price)
+- sku (the product sku if it exists, otherwise the full product name, lowercase with underscores connecting words)
+- image_url (the url to the raw product image)
+
+
+Do you have everything you need to get started on these first 5?
+A couple additional recommendations would be:
+- start a fresh github repo to push your scrapper code 
+- please separate the code for each site into a separate script / jupyter notebook
+- add an additional column to the csv called "username" where you simply repeat the brand name for each row
+- label the output csv <username>.csv for each brand
