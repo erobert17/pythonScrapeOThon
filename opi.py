@@ -15,6 +15,7 @@ import os
 import urlparse
 import csv
 import json
+import urllib
 
 def find_between( s, first, last ):
     try:
@@ -35,9 +36,14 @@ def extract_between(text, sub1, sub2, nth=1):
         return None
     return text.split(sub1, nth)[-1].split(sub2, nth)[0]
 
-allCategoryUrls = ["https://www.opi.com/nail-products/nail-polish0"."https://www.opi.com/nail-products/gel", "https://www.opi.com/nail-products/long-wear", "https://www.opi.com/nail-products/dipping-powders", "https://www.opi.com/nail-products/acrylics", "https://www.opi.com/nail-care/hands-and-feet"]
+allCategoryUrls = ["https://www.opi.com/nail-products/nail-polish","https://www.opi.com/nail-products/gel", "https://www.opi.com/nail-products/long-wear", "https://www.opi.com/nail-products/dipping-powders", "https://www.opi.com/nail-products/acrylics", "https://www.opi.com/nail-care/hands-and-feet"]
 
-browser = webdriver.Firefox()
+firefox_profile = webdriver.FirefoxProfile()
+firefox_profile.set_preference('permissions.default.image', 2)
+firefox_profile.set_preference('dom.ipc.plugins.enabled.libflashplayer.so', 'false')
+
+browser = webdriver.Firefox(firefox_profile=firefox_profile)
+#browser = webdriver.Firefox()
 allProductsUrls=[]
 
 for x in range(0, len(allCategoryUrls)):
@@ -45,42 +51,68 @@ for x in range(0, len(allCategoryUrls)):
 	with open('jquery-3.1.0.min.js', 'r') as jquery_js: 
 		jquery = jquery_js.read() #read the jquery from a file
 		browser.execute_script(jquery) #active the jquery lib
-		subPageHrefs = browser.execute_script("var allProductHrefs=[]; $('h2.product-name a').each(function(){ var href = $(this).attr('href'); allProductHrefs.push(href); }); return allProductHrefs;");
+		#keep clikcing 'show more +' button until it no longer exists.
+		#browser.execute_script("function checkDisplay(){ var display = $('.btn-loadmore span:contains(SHOW MORE):nth(1)').css('display');if( display == 'block'){$('.btn-loadmore span:contains(SHOW MORE):nth(1)').click()}else{i = 100;} }for (var i = 0; i < 10; i++) { setTimeout(function(){ checkDisplay(); } , 1000);}")
+		subPageHrefs = browser.execute_script("var allProductUrls = [];$('div.views-field-field-bottle-image a').each(function(){var href = $(this).attr('href');allProductUrls.push(href); });return allProductUrls;");
 		#print subPageHrefs
 		print len(subPageHrefs), ' subPageHrefs'
 		for s in range(0, len(subPageHrefs)):
-		allProductsUrls.append(subPageHrefs[s]);
+			allProductsUrls.append(subPageHrefs[s]);
 
-#with each product url stored in allProductUrls
-#loop through each and collect all products
 allProductData=[]
 alreadyScraped=[]
+#with each product url stored in allProductUrls
+#loop through each and collect all products
+with open('alreadyScrapedProductUrls.json') as json_file:  
+	alreadyScraped = json.load(json_file)
+
+#open saved scraped data.
+with open('storeScrapedData.json') as json_file:  
+	allProductData = json.load(json_file)
+
+with open('alreadyScrapedProductUrls.json') as json_file:  
+	alreadyScrapedTemp = json.load(json_file)
+
+for x in range(0, len(alreadyScrapedTemp)):
+	alreadyScraped = alreadyScrapedTemp[x][ alreadyScrapedTemp[x].index('.com')+4: len(alreadyScrapedTemp[x]) ]
+
+print 'alreadyScraped length ',len(alreadyScraped) 
+print alreadyScraped
+
 for x in range(0, len(allProductsUrls)):#Each page of results, all categories in one array
-	url = allProductsUrls[x]
+	
+	url = urlparse.urljoin('http://www.opi.com', allProductsUrls[x])
 	print 'url:::    ',url
 	browser.get(url)
-
-	if 1 == 1:
+	
+	if allProductsUrls[x] not in alreadyScraped:
 		with open('jquery-3.1.0.min.js', 'r') as jquery_js: 
 			jquery = jquery_js.read() #read the jquery from a file
 			browser.execute_script(jquery)
 			print "Saving data"
-			productName = browser.execute_script("var name = $('.product-name h2').text(); name = name.replace(/\s{2,}/g, ' '); return name;");
-			print 'productName:',productName
+			productName = browser.execute_script("return $('h1').text();");
 			productUrl = url
 			productPrice = browser.execute_script("return $('.price-info .price-box span.regular-price span.price').text();")
-			productSku = 'none'
+			productSku = browser.execute_script("var sku = $('.field-content:contains(CODE:)').text(); sku = sku.substring(sku.indexOf('CODE')+5, sku.length);return sku;");
 			#productSku = browser.execute_script("return $('div.product-number span').text()")
-			rawImgHtml = browser.execute_script("return $('ul.product-image-gallery-images-slider li.product-image-gallery-images-img img').attr('src');")
+			productImageSrc = browser.execute_script("return $('.product-photo img').attr('src');")
 			#productImageSrc = rawImgHtml[rawImgHtml.index('background-image: url(&quot;')+28:rawImgHtml.index('&quot;);')]
-			productImageSrc = rawImgHtml
-			print productImageSrc
+			
+			print 'productName:',productName
+			print 'sku:',productSku
+			print 'price:',productPrice
+			print 'imgSrc:', productImageSrc
 			#encoding for csv
-			productName = u' '.join((productName)).encode('utf-8').strip()
-			productPrice =  u' '.join((productPrice)).encode('utf-8').strip()
-			productSku =  u' '.join((productSku)).encode('utf-8').strip()
+			
 			allProductData.append([productName, productUrl, productPrice, productSku, productImageSrc, 'opi']);
-			alreadyScraped.append(productUrl)
+			alreadyScraped.append(allProductsUrls[x])
+			with open('alreadyScrapedProductUrls.json', 'w') as outfile:  
+				json.dump(alreadyScraped, outfile)
+			with open('storeScrapedData.json', 'w') as outfile:  
+				json.dump(allProductData, outfile)
+	else:
+		print 'already scraped!!!!!'
+
 
 with open("opi.csv", "wb") as f:
 	writer = csv.writer(f)
