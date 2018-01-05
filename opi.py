@@ -73,8 +73,8 @@ with open('storeScrapedData.json') as json_file:
 with open('alreadyScrapedProductUrls.json') as json_file:  
 	alreadyScrapedTemp = json.load(json_file)
 
-for x in range(0, len(alreadyScrapedTemp)):
-	alreadyScraped = alreadyScrapedTemp[x][ alreadyScrapedTemp[x].index('.com')+4: len(alreadyScrapedTemp[x]) ]
+#for x in range(0, len(alreadyScrapedTemp)):
+	#alreadyScraped = alreadyScrapedTemp[x][ alreadyScrapedTemp[x].index('.com')+4: len(alreadyScrapedTemp[x]) ]
 
 print 'alreadyScraped length ',len(alreadyScraped) 
 print alreadyScraped

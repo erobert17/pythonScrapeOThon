@@ -14,7 +14,7 @@ import pyexcel as pe     # pip install pyexcel
 import pyexcel.ext.xls   # pip install pyexcel-xls
 
 
-csvData = pe.get_array(file_name="purcosmetics.csv") # done\
+csvData = pe.get_array(file_name="anastasiabeverlyhills.csv") # done\
 
 def removeSpaces(string):
 	string = string.replace('  ','*-*')
@@ -23,7 +23,7 @@ def removeSpaces(string):
 	return string
 
 allProductData = []
-allProductData.append(['name', 'product url', 'price', 'sku','imgUrl','company']);
+#allProductData.append(['name', 'product url', 'price', 'sku','imgUrl','company']);
 print len(csvData)
 for x in xrange(0,len(csvData)):
 
@@ -31,6 +31,7 @@ for x in xrange(0,len(csvData)):
 	name = removeSpaces(name)
 	pUrl = csvData[x][1]
 	price = csvData[x][2]
+	price = removeSpaces(price)
 	sku = csvData[x][3]
 	if sku == 'none' or sku == 'n o n e':
 		sku = name
@@ -49,7 +50,7 @@ for x in xrange(0,len(csvData)):
 	print 'company:',csvData[x][5]
 	allProductData.append([name, pUrl, price, sku,imgUrl,company]);
 
-with open("purcosmetics2.csv", "wb") as f:
+with open("anastasiabeverlyhills2.csv", "wb") as f:
 	writer = csv.writer(f)
 	writer.writerows(allProductData)
 

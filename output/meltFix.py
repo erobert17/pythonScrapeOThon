@@ -38,16 +38,18 @@ for x in xrange(0,len(csvData)):
 
 	print csvData[x][4]
 
-
 	name = csvData[x][0]
-	name = removeSpaces(name)
+	#name = removeSpaces(name)
 	pUrl = csvData[x][1]
 	price = csvData[x][2]
+	price = price.replace(' ','')
 	sku = csvData[x][0]
-	sku = sku.lower()
-	sku = removeSpaces(sku)
-	sku = sku.replace(' ','_')
-	imgUrl = csvData[x][4]
+	#sku = sku.lower()
+	#sku = removeSpaces(sku)
+	#sku = sku.replace(' ','_')
+	print csvData[x][4]
+	imgUrl = 'cd'
+	imgUrl += csvData[x][4]
 	company = csvData[x][5]
 
 	print 'name:',csvData[x][0]

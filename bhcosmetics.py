@@ -92,6 +92,8 @@ for x in range(0, len(allProductsUrls)):#Each page of results, all categories in
 			#productName = browser.execute_script("var name = $('div.breadcrumbs li.product').text(); name = name.replace(/\s{2,}/g, ' '); return name;")
 			productName = ' '.join(productName.split())
 			print 'productName:',productName
+			productName = name.replace('&amp', ' and ')
+			productName = name.replace(',', '')
 			productUrl = url
 			productPrice = browser.execute_script("var price =  $('.product-shop .special-price span.price').text(); price = price.replace(/\s{2,}/g, ' '); return price;")
 			productPrice = ' '.join(productPrice.split())
